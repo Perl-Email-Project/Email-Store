@@ -1,8 +1,10 @@
 Revision history for Perl extension Email::Store.
 
-0.25
-    - turn on autocommit for Pg databases (bug 13068)
+0.25   2006-07-23
+    - require 3.0.3 Class::DBI to avoid attempts at null PK (bug 13902)
+    - turn on autocommit for Pg and Oracle databases (bug 13068, 13069)
     - update tests to use SQLite, not SQLite2, to match prereq
+    - some documentation updates (bug 7772)
 
 0.24 Mon Feb  7 12:02:32 GMT 2005
     - There were various problems with attachments which seem to be todo with 

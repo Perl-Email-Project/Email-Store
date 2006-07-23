@@ -4,7 +4,7 @@ WriteMakefile(
     NAME              => 'Email::Store',
     VERSION_FROM      => 'lib/Email/Store.pm',
     PREREQ_PM         => {
-        Class::DBI => 0.9,
+        Class::DBI => '3.0.3',
         Class::DBI::DATA::Schema => 0,
         DBD::SQLite => 0,
         Email::Address   => 1.80,

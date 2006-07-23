@@ -1,4 +1,5 @@
-use Test::More tests => 5;
+use Test::More skip_all => "This test doesn't work without message.out.";
+# use Test::More tests => 5;
 use File::Slurp;
 BEGIN { unlink("t/test.db"); }
 use Email::Store { only => [qw( Mail Attachment )] }, 

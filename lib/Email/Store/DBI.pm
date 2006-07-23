@@ -26,7 +26,7 @@ sub import {
         $self->translate(mysql => $self->__driver);
         if ($self->__driver =~ /SQLite/) {
             $self->db_Main->{sqlite_handle_binary_nulls} = 1;
-        } elsif ($self->__driver =~ /PostgreSQL/) {
+        } elsif ($self->__driver =~ /PostgreSQL|Pg|Oracle/) {
             $self->db_Main->{AutoCommit} = 1;
         }
     }
@@ -55,6 +55,10 @@ sub translate {
 =head1 NAME
 
 Email::Store::DBI - Database backend to Email::Store
+
+=head1 SYNOPSIS
+
+ use Email::Store 'dbi:...';
 
 =head1 DESCRIPTION
 
