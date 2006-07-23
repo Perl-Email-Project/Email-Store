@@ -1,18 +1,19 @@
 package Email::Store::Mail;
-use base 'Email::Store::DBI';
-use Time::HiRes;
-use strict; 
+use strict;
 use warnings;
+use base 'Email::Store::DBI';
 
 require Email::Store;
+*call_plugins = \&Email::Store::call_plugins;
+*plugins = \&Email::Store::plugins;
 
 Email::Store::Mail->table("mail");
 Email::Store::Mail->columns(All => qw/message_id message/);
 Email::Store::Mail->columns(Primary => qw/message_id/);
 Email::Store::Mail->columns(TEMP => qw/simple/);
-use Module::Pluggable::Ordered search_path => ["Email::Store"], only => [ keys %Email::Store::only ];
-
 use Email::Simple;
+use Email::MIME;
+use Email::MessageID;
 
 sub _simple { Email::Simple->new(shift); } # RFC2822 -> Email::Simple
 
@@ -27,6 +28,7 @@ sub store {
     my ($class, $rfc822) = @_;
     my $simple = Email::Simple->new($rfc822);
     my $msgid = $class->fix_msg_id($simple);
+
     my $self;
 
     if ($self = $class->retrieve($msgid)) {
@@ -34,8 +36,8 @@ sub store {
         return $self;
     }
 
-    $self = $class->create ({ message_id => $msgid, 
-                              message    => $rfc822, 
+    $self = $class->create ({ message_id => $msgid,
+                              message    => $simple->as_string,
                               simple     => $simple });
     $self->call_plugins("on_store", $self);
     $self;
@@ -43,11 +45,31 @@ sub store {
 
 sub fix_msg_id {
     my ($self, $simple) = @_;
-    my $id = $simple->header("Message-ID");
-    if ($id) { $id =~ s/.*<(.+)>.*/$1/ && return $id; }
-    my $fake = $$."-".time()."\@unknown";
-    $simple->header_set("Message-ID", "<$fake>");
+
+    if ( my $id = $simple->header("Message-ID") ) {
+        $id =~ s/.*<(.+)>.*/$1/ && return $id;
+    }
+    my $fake = Email::MessageID->new.'';
+    $simple->header_set("Message-ID", $fake);
+    $fake =~ s/^.(.*).$/$1/; # we don't want the <>
     return $fake;
+}
+
+
+sub utf8_body {
+    my $mail = shift;
+    my $mime = Email::MIME->new($mail->message);
+
+    my $body = $mime->body;
+    my $charset = $mime->{ct}->{attributes}{charset};
+    if ($charset and $charset !~ /utf-?8/i) {
+        eval {
+            require Encode;
+            $body = Encode::decode($charset, $body);
+            Encode::_utf8_off($body);
+        };
+    }
+    $body;
 }
 
 1;

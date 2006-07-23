@@ -4,7 +4,9 @@ use strict;
 use warnings;
 require Email::Store::DBI;
 use UNIVERSAL::require;
-use vars qw(%only);
+use vars qw(%only $VERSION);
+
+$VERSION = '0.24';
 
 sub import { 
     shift; 
@@ -20,8 +22,8 @@ sub import {
             }
     } 
 
-    require Module::Pluggable;
-    Module::Pluggable->import(%args);
+    require Module::Pluggable::Ordered;
+    Module::Pluggable::Ordered->import(%args);
 
     Email::Store::DBI->import(@_);
 
@@ -32,19 +34,20 @@ sub import {
 }
 
 sub setup {
-    for my $class (shift->plugins()) {
+    my $self    = shift;
+    my $verbose = shift || 0;
+    for my $class ($self->plugins()) {
         next unless $only{$class};
         $class->require or next;
 
         if ($class->can("run_data_sql")) {
-            warn "Setting up database in $class\n";
+            warn "Setting up database in $class\n" if $verbose;
             local $SIG{__WARN__} = sub {}; # No really, shut up
             $class->run_data_sql ;
         }
     }
 }
 
-our $VERSION = '0.15';
 # Preloaded methods go here.
 
 1;
@@ -146,7 +149,8 @@ you want.
 =item C<Email::Store::Date>
 
 This adds the C<date> method to a C<mail> object, returning a C<Time::Piece>
-representing the date of the email.
+representing the date of the email. It also provides various searches for
+mails between epoch times and for years, months and days.
 
 =item C<Email::Store::Entity>
 
@@ -198,6 +202,9 @@ again on installing any additional plugin modules, to create the new
 tables they want to use. Note that this does not retroactively index
 existing mail with the new functions provided by the modules you've just
 installed! - a C<reindex> method is planned, but is not there yet.
+
+It should be noted that passing in an optional true value to setup will
+cause it to be verbose about what it's doing.
 
 This is all the functionality that C<Email::Store> itself provides. See
 the documentation to the various plugins for their public interface,
@@ -313,7 +320,16 @@ indexing, reindexing and other processes.
 
 =head1 AUTHOR
 
-Simon Cozens, E<lt>simon@cpan.orgE<gt>
+The original author is Simon Cozens, E<lt>simon@cpan.orgE<gt>
+Currently maintained by Simon Wistow E<lt>simon@thegestalt.orgE<gt>
+
+=head1 SUPPORT
+
+This module is part of the Perl Email Project - http://pep.kwiki.org/
+
+There is a mailing list at pep@perl.org (subscribe at pep-subscribe@perl.org) 
+and an archive available at http://nntp.perl.org/group/pep.php
+
 
 =head1 CREDITS
 

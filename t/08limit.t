@@ -2,7 +2,7 @@ use Test::More tests => 4;
 use File::Slurp;
 BEGIN { unlink("t/test.db"); }
 
-use Email::Store { only => [ "Mail" ] }, "dbi:SQLite:dbname=t/test.db";
+use Email::Store { only => [ "Mail" ] }, "dbi:SQLite2:dbname=t/test.db";
 #use Email::Store "dbi:mysql:mailstore";
 Email::Store->setup;
 ok(1, "Set up");

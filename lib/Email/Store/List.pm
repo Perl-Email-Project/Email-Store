@@ -2,7 +2,7 @@ package Email::Store::List;
 use strict;
 use warnings;
 use base 'Email::Store::DBI';
-use Mail::ListDetector;
+use Mail::ListDetector 0.31;
 Email::Store::List->table("list");
 Email::Store::List->columns(All => qw/id name posting_address/);
 Email::Store::List->columns(Primary => qw/id/);
@@ -11,9 +11,7 @@ sub on_store_order { 70 }
 
 sub _detect {
     my ($self, $simple) = @_;
-    my $list = eval { Mail::ListDetector->new( $simple ) } or return;
-    # eval shouldn't be necessary, but there's a slight bug in LD 0.3,
-    # and 0.31 isn't out yet.
+    my $list = Mail::ListDetector->new( $simple ) or return;
     Email::Store::List->find_or_create({
         name => $list->listname,
         posting_address => $list->posting_address

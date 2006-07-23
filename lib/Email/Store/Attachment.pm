@@ -1,30 +1,63 @@
 package Email::Store::Attachment;
 use base "Email::Store::DBI";
 use strict;
-use Email::MIME::Attachment::Stripper; # Until we write our own
-use Email::Abstract;
-use Email::MIME;
+use MIME::Parser;
 __PACKAGE__->table("attachment");
-__PACKAGE__->columns(All => qw[id mail filename content_type payload ]);
+__PACKAGE__->columns(All => qw[ id mail filename content_type payload ]);
 __PACKAGE__->has_a(mail => "Email::Store::Mail");
 Email::Store::Mail->has_many(attachments => "Email::Store::Attachment");
 
+
 sub on_store {
     my ($class, $mail) = @_;
-    my $mm;
-    { local $SIG{__WARN__} = sub { "Shut *UP*, Mail::Box!" };
-      my $mail_message = Email::Abstract->cast($mail->message, "Email::MIME");
-      $mm = Email::MIME::Attachment::Stripper->new( $mail_message );
+
+    my $id     = $mail->message_id;
+    my $rfc822 = $mail->message;
+    my $parser = MIME::Parser->new();
+
+    $parser->output_to_core('ALL');
+    $parser->extract_nested_messages(0);
+
+    my $entity = $parser->parse_data($rfc822);
+
+    my @keep;
+    for ($entity->parts) {
+        push (@keep, $_) && next if keep_part($_);
+        my $type    = $_->effective_type;
+        my $file    = $_->head->recommended_filename() || invent_filename($type);
+        my $payload = $_->bodyhandle->as_string;
+        $class->create({ mail => $id,  payload => $payload, content_type => $type, filename => $file });
     }
-    $mail->add_to_attachments($_) for $mm->attachments;
-    # In case we twiddled it
-    $mm->message->header_set("Message-ID", $mail->message_id); 
-    $mail->message($mm->message->as_string);
+    $entity->parts(\@keep);
+    $entity->make_singlepart;
+
+    $mail->message($entity->as_string);
     undef $mail->{simple}; # Invalidate cache
     $mail->update;
 }
 
 sub on_store_order { 1 }
+
+my $gname = 0;
+
+sub invent_filename {
+    my ($ct) = @_;
+    require MIME::Types;
+    my $type = MIME::Types->new->type($ct);
+    my $ext = $type && (($type->extensions)[0]);
+    $ext ||= "dat";
+    return "attachment-$$-".$gname++.".$ext";
+}
+
+
+sub keep_part {
+    my $p = shift;
+    my $fn = $_->head->recommended_filename();
+    my $ct = $p->effective_type                   || 'text/plain';
+    my $dp = $p->head->get('Content-Disposition') || 'inline';
+    return $ct =~ m[text/plain] && $dp =~ /inline/ && (!defined $fn or $fn =~ /^\s*$/);
+}
+
 
 1;
 
