@@ -1,5 +1,9 @@
 Revision history for Perl extension Email::Store.
 
+0.25
+    - turn on autocommit for Pg databases (bug 13068)
+    - update tests to use SQLite, not SQLite2, to match prereq
+
 0.24 Mon Feb  7 12:02:32 GMT 2005
     - There were various problems with attachments which seem to be todo with 
       Email::MIME therefore switch (hopefully temporarily) to MIME::Parser

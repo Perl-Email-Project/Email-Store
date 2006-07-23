@@ -6,7 +6,7 @@ BEGIN { unlink("t/test.db"); }
 # Africa/Luanda is used because it doesn't have a different summertime offset
 $ENV{TZ} = 'Africa/Luanda';
 
-use Email::Store "dbi:SQLite2:dbname=t/test.db";
+use Email::Store "dbi:SQLite:dbname=t/test.db";
 Email::Store->setup;
 ok(1, "Set up");
 

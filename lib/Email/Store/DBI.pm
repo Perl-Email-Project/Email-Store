@@ -26,6 +26,8 @@ sub import {
         $self->translate(mysql => $self->__driver);
         if ($self->__driver =~ /SQLite/) {
             $self->db_Main->{sqlite_handle_binary_nulls} = 1;
+        } elsif ($self->__driver =~ /PostgreSQL/) {
+            $self->db_Main->{AutoCommit} = 1;
         }
     }
 }

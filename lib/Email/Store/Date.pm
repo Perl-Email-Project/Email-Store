@@ -5,8 +5,7 @@ use Email::Store::DBI;
 use base 'Email::Store::DBI';
 use Email::Store::Mail;
 
-use Time::Piece;
-use Date::Parse;
+use Email::Date 1.10 ();
 
 Email::Store::Date->table("mail_date");
 Email::Store::Date->columns( All => qw/mail date year month day/ );
@@ -23,28 +22,19 @@ sub on_store {
     my ($self, $mail) = @_;
     my $simple = $mail->simple;
 
-    my $date   = $simple->header('date')
-                 || _get_date_in_received_header($simple)
-                 || $simple->header('resent-date');
+    my $tp = Email::Date::find_date($simple);
+    
+    # This mirrors old behavior, but seems stupid. -- rjbs, 2006-07-23
+    $tp = Time::Piece->new unless defined $tp;
 
-    my $time   = str2time($date);
-    my $tp     = Time::Piece->new($time);
     Email::Store::Date->create( {
         mail  => $mail->id,
-        date  => $time,
+        date  => $tp->epoch,
         year  => $tp->year,
         month => $tp->mon,
         day   => $tp->mday,
     } );
 }
-
-sub _get_date_in_received_header {
-    my @received = shift->header("Received");
-    return unless @received;
-    my $date = $received[-1];
-    $date =~ s/.*;// and return $date;
-}
-
 
 sub on_gather_plucene_fields_order { 80 }
 sub on_gather_plucene_fields {
