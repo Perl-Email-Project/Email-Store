@@ -1,4 +1,5 @@
 package Email::Store::Entity;
+use strict;
 use base "Email::Store::DBI";
 Email::Store::Entity->table("entity");
 Email::Store::Entity->columns(Primary => qw/id/);
