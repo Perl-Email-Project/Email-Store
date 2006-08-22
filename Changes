@@ -1,5 +1,9 @@
 Revision history for Perl extension Email::Store.
 
+0.251  2006-08-22
+    - use strict in all modules
+    - correctly add pod test
+
 0.25   2006-07-23
     - require 3.0.3 Class::DBI to avoid attempts at null PK (bug 13902)
     - turn on autocommit for Pg and Oracle databases (bug 13068, 13069)
