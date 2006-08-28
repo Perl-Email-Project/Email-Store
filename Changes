@@ -1,5 +1,8 @@
 Revision history for Perl extension Email::Store.
 
+0.252  2006-08-28
+    - add todo pod-coverage test
+
 0.251  2006-08-22
     - use strict in all modules
     - correctly add pod test
