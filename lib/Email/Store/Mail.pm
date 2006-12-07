@@ -84,7 +84,7 @@ Email::Store::Mail - An email in the database
 
     my $mail = Email::Store::Mail->retrieve($msgid);
 
-    my Email::Simple $simple = $mail->simple;
+    my $simple = $mail->simple;
     print $mail->message;
 
     # Plus many additional accessors added by plugins
