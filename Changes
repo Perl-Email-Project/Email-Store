@@ -1,5 +1,8 @@
 Revision history for Perl extension Email::Store.
 
+0.255     2007-03-22
+          packaging improvements
+
 0.254  2006-09-19
     - previously, "only" arguments had to be suffices to Email::Store::
       this is now fixed; also, except didn't seem to be implemented, and now is
