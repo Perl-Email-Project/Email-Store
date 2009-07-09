@@ -6,7 +6,7 @@ require Email::Store::DBI;
 use UNIVERSAL::require;
 use vars qw(%only $VERSION);
 
-$VERSION = '0.255';
+$VERSION = '0.256';
 
 sub import { 
     shift; 

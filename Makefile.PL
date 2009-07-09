@@ -2,6 +2,13 @@ use 5.006;
 use strict;
 use ExtUtils::MakeMaker;
 
+if ($ENV{AUTOMATED_TESTING}) {
+  # This module is basically unused, abandoned, and done.  There is no need to
+  # bother with test reports. -- rjbs, 2009-07-09
+  # Real failures from real users are welcome.
+  exit 0;
+}
+
 WriteMakefile(
     NAME              => 'Email::Store',
     VERSION_FROM      => 'lib/Email/Store.pm',

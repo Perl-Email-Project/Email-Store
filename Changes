@@ -1,4 +1,7 @@
-Revision history for Perl extension Email::Store.
+Revision history for Perl extension Email::Store
+
+0.256     2009-07-09
+          request that this module no longer be smoke tested
 
 0.255     2007-03-22
           packaging improvements
